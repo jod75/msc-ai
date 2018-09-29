@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.2.4/css/buttons.dataTables.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-toggleable-md navbar-light bg-primary">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand">ICS5200</a>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link active" href="#" id="toolboxMenuItem">Home <span class="sr-only">(current)</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home page -->
+    <div class="contrainer" id="homeContainer">
+        Search
+    </div>
+
+    <!-- Show search resutls -->
+    <div class="contrainer" id="resultsContainer">
+        <div class="card">
+            <div class="card-block">
+                <h4 class="card-title">Virtual Screening Results</h4>
+                <h6 class="card-subtitle mb-2 text-muted"></h6>
+                <p class="card-text"></p>
+                <!-- Ligand result table -->
+                <div class="row">
+                    <div class="col">
+                        Query ligand:
+                        <div><samp><span id="queryLigandMolRegNo">-</span></samp></div>
+                        <br/>
+                        <div id="queryLigandSVG"></div>
+                        <br/> Unique Protein Accessions found:
+                        <div><samp><span id="knownLigandsUniqueCompId">-</span></samp></div>
+                        <br/> Selected ligand:
+                        <div><samp><span id="knownLigandMolRegNo">-</span></samp></div>
+                        <div id="knownLigandSVG"></div>
+                        <div id="knownLigandSmiles"></div>
+                    </div>
+                    <div class="col col-md-auto">
+                        <table id="ligandSimilarityTable" class="display" cellspacing="0" width="90%">
+                            <thead>
+                                <tr>
+                                    <th>Mol Reg No</th>
+                                    <th>Similarity</th>
+                                    <th>Row ID</th>
+                                    <th>Assay ID</th>
+                                    <th>Mol Reg No</th>
+                                    <th>Std Relation</th>
+                                    <th>Std Value</th>
+                                    <th>Std Units</th>
+                                    <th>Std Type</th>
+                                    <th>pChEMBL Value</th>
+                                    <th>Component ID</th>
+                                    <th>Smiles</th>
+                                    <th>Protein Desc</th>
+                                    <th>Protein Accession</th>
+                                    <th>Component ID (2)</th>
+                                    <th>MolRegNo</th>
+                                    <th>Molecule Pref Name</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbox page -->
+    <div class="contrainer" id="toolboxContainer">
+        <div class="alert alert-danger" id="noconnection-alert">
+            <button type="button" class="close" data-dismiss="alert">x</button>
+            <strong>Error </strong> Cannot connect to ICS5200 server. Please check that the backend engine is up and running.
+        </div>
+        <div class="card">
+            <div class="card-block">
+                <h4 class="card-title">Virtual Screening toolbox</h4>
+                <h6 class="card-subtitle mb-2 text-muted"></h6>
+                <p class="card-text">Enter your query data here.</p>
+                <div class="input-group">
+                    <span class="input-group-addon">
+                        <input type="radio" id="rdToolboxSearchLigand" name="options" aria-label="Checkbox for following text input">
+                    </span>
+                    <span class="input-group-addon">Ligand SMILES:</span>
+                    <input type="text" class="form-control" id="txtToolboxSearchLigand" value="O=C(C)Oc1ccccc1C(=O)O" aria-label="Text input with checkbox">
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button" id="btnToolboxSearchLigand">Go!</button>
+                    </span>
+                </div>
+                <br>
+                <div class="input-group">
+                    <span class="input-group-addon">
+                        <input type="radio" id="rdToolboxSearchProtein" name="options" aria-label="Checkbox for following text input">
+                    </span>
+                    <span class="input-group-addon">Protein Sequence:</span>
+                    <textarea class="form-control custom-control" rows="3" id="txtToolboxSearchProtein" placeholder="Search for..." aria-label="Text input with checkbox">
+                    </textarea>
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button" id="btnToolboxSearchProtein">Go!</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Ligand toolbox -->
+        <div class="card" id="cardToolboxLigand">
+            <div class="card-block">
+                <h4 class="card-title">Ligand</h4>
+                <h6 class="card-subtitle mb-2 text-muted"></h6>
+                <p class="card-text"></p>
+                <div class="row">
+                    <table style="width:100%">
+                        <tr>
+                            <td>
+                                <div id="smilesCanvas"></div>
+                            </td>
+                            <td>
+                                <div id="moleculeData"></div>
+                                <div id="moleculeRegNo"></div>
+                                <div id="moleculeBindings"></div>
+                                <br>
+                                <div id="virtualScreen">                                
+                                    <div id="toolboxChemInfo">
+                                    <div class="card-block">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <input type="radio" name="fpoption" id="ckToolboxMorganFingerprint" aria-label="Checkbox for following text input" checked>
+                                            </span>
+                                            <input type="text" class="form-control" value="Use Morgan fingerprints (ECFP4)" aria-label="Text input with checkbox" disabled >
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <input type="radio" name="fpoption" id="ckToolboxMACCSnFingerprint" aria-label="Checkbox for following text input">   
+                                            </span>
+                                            <input type="text" class="form-control" value="Use MACCS fingerprints" aria-label="Text input with checkbox" disabled >
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <input type="radio" name="fpoption" id="ckToolboxE3FPFingerprint" aria-label="Checkbox for following text input">   
+                                            </span>
+                                            <input type="text" class="form-control" value="Use E3FP fingerprints" aria-label="Text input with checkbox" disabled >
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Tanimoto similarity coefficient:</span>
+                                            <input type="text" class="form-control" id="txtToolboxTanimotoCoefficient" value="0.8" aria-label="Text input with checkbox">
+                                        </div>
+                                    </div>
+                                    </div>
+                                    <br>
+                                    <span>
+                                    <button type="button" class="btn btn-primary" id="btnToolboxScreenLigands">Screen ligands and find possible target proteins</button>
+                                    <button type="button" class="btn btn-primary" id="btnToolboxScreenResultsLigands">Back to last results</button>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Protein toolbox -->
+        <div class="card" id="cardToolboxProtein">
+            <div class="card-block">
+                <h4 class="card-title">Protein</h4>
+                <h6 class="card-subtitle mb-2 text-muted"></h6>
+                <p class="card-text"></p>
+                <div id="toolboxProteinDescription"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/colreorder/1.3.2/js/dataTables.colReorder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay_progress.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.2.4/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/pdfmake.min.js"></script>
+    <script src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.2.4/js/buttons.html5.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script src="http://requirejs.org/docs/release/2.2.0/minified/require.js"></script>
+    <script src="js/ics5200.js"></script>
+</body>
+
+</html>
